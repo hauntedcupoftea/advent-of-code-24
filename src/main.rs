@@ -1,46 +1,39 @@
-use std::fs::File;
-use std::io::{self, BufRead};
-
-fn calculate_total_distance(file_path: &str) -> io::Result<i32> {
-    // Open the file in read-only mode
-    let file = File::open(file_path)?;
-    let reader = io::BufReader::new(file);
-
-    // Collect the numbers from the file
-    let mut left_list: Vec<i32> = Vec::new();
-    let mut right_list: Vec<i32> = Vec::new();
-
-    for line in reader.lines() {
-        let line = line?;
-        let numbers: Vec<i32> = line
-            .split_whitespace()
-            .filter_map(|num| num.parse().ok())
-            .collect();
-
-        if numbers.len() == 2 {
-            left_list.push(numbers[0]);
-            right_list.push(numbers[1]);
-        }
-    }
-
-    // Sort both lists
-    left_list.sort();
-    right_list.sort();
-
-    // Calculate the total distance between the pairs
-    let total_distance: i32 = left_list
-        .iter()
-        .zip(right_list.iter())
-        .map(|(left, right)| (left - right).abs()) // Calculate the absolute difference
-        .sum(); // Sum the differences
-
-    Ok(total_distance)
-}
+use advent_of_code_day1::{solve_puzzle_1_1, solve_puzzle_1_2};
+use std::env;
+use std::process;
 
 fn main() {
-    let file_path = "../data/day1-1.txt"; // Replace with your actual file path
-    match calculate_total_distance(file_path) {
-        Ok(distance) => println!("Total distance: {}", distance),
-        Err(e) => eprintln!("Error reading file: {}", e),
+    // Collect command-line arguments
+    let args: Vec<String> = env::args().collect();
+
+    // Check if we have enough arguments
+    if args.len() < 3 {
+        eprintln!("Usage: {} <puzzle_number> <file_path>", args[0]);
+        process::exit(1);
+    }
+
+    // Parse puzzle number
+    let puzzle_number = &args[1];
+
+    // Get file path
+    let file_path = &args[2];
+
+    // Solve the specified puzzle
+    let result = match puzzle_number.as_str() {
+        "1-1" => solve_puzzle_1_1(file_path),
+        "1-2" => solve_puzzle_1_2(file_path),
+        _ => {
+            eprintln!("Puzzle {} is not implemented", puzzle_number);
+            process::exit(1);
+        }
+    };
+
+    // Handle the result
+    match result {
+        Ok(distance) => println!("Puzzle {} result: {}", puzzle_number, distance),
+        Err(e) => {
+            eprintln!("Error solving puzzle {}: {}", puzzle_number, e);
+            process::exit(1);
+        }
     }
 }
